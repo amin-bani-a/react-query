@@ -1,50 +1,33 @@
-import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import customFetch from "./utils";
+import { useDeleteTask } from "./reactQueryCustomHooks";
+import { useEditTask } from "./reactQueryCustomHooks";
 
 const SingleItem = ({ item }) => {
-  const queryClient = useQueryClient();
-
-  const { mutate: editTask } = useMutation({
-    mutationFn: ({ taskId, isDone }) => {
-      customFetch.patch(`/${taskId}`, { isDone });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    },
-  });
-
-  const { mutate: deleteTask, isLoading } = useMutation({
-    mutationFn: (taskId) => {
-      customFetch.delete(`/${taskId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    },
-  });
+  const { editTask } = useEditTask();
+  const { deleteTask, deleteTaskLoading } = useDeleteTask();
 
   return (
     <div className="single-item">
       <input
         type="checkbox"
+        id={item.id}
         checked={item.isDone}
         onChange={() => editTask({ taskId: item.id, isDone: !item.isDone })}
       />
-      <p
-        style={{
-          textTransform: "capitalize",
-          textDecoration: item.isDone && "line-through",
-        }}
-      >
-        {item.title}
-      </p>
+      <label htmlFor={item.id}>
+        <p
+          style={{
+            textTransform: "capitalize",
+            textDecoration: item.isDone && "line-through",
+          }}
+        >
+          {item.title}
+        </p>
+      </label>
+
       <button
         className="btn remove-btn"
         type="button"
-        disabled={isLoading}
+        disabled={deleteTaskLoading}
         onClick={() => deleteTask(item.id)}
       >
         delete
